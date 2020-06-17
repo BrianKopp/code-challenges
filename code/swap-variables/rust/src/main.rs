@@ -17,64 +17,57 @@ fn main() {
 
 // Make a function that swaps the integers out
 // without using any temp variables
+// the function handles edge cases, and otherwise
+// recursively massages the integers while calling itself
+// until the integer values are what it expects.
+// It wants the integers to be positive, and a > b.
+// and will recurse until it accomplishes that.
 fn swap_integers(a: &mut i32, b: &mut i32) {
     // suppose values 5 and 3, we can swap them out by
     // updating the value of 5 to 5-3=2, then
     // updating the value of 3 to 3+2=5, then
     // updating the value of 2 to 5-2=3.
 
-    // some limitations - this won't protect against integer overflows
-    // e.g. if a is int.min and b is int.max, bad things are going to happen
-    
-    // quickly handle the case where we have zeros
-    if *a == 0 || *b == 0 {
-        *a = *a - *b;
-        *b = *b + *a;
-        *a = *b - *a;
+    // bail if the numbers are identical
+    if *a == *b {
         return;
     }
 
-    // handle the case where the numbers have the same sign
-    if (*a)/(*b) >= 0 {
-        if (*a < 0 && *a < *b) || (*a > 0 && *a > *b) {
-            // do a-b
-            *a = *a - *b;
-            *b = *b + *a;
-            *a = *b - *a;
-            return;
-        } else {
-            // do b-a
-            *b = *b - *a;
-            *a = *a + *b;
-            *b = *a - *b;
-            return;
-        }
-    } else {
-        // they have different signs
-        if (*a < 0 && *a == i32::MIN) || (*a < 0 && -1*(*a) > *b) {
-            // absolute value of a is greater than b
-            // since different signs, swap the add/subtracts
-            println!("block one {:?} {:?}", a, b);
-            *b = *b + *a;
-            println!("{:?} {:?}", a, b);
-            *a = *b - *a;
-            println!("{:?} {:?}", a, b);
-            *b = *b - *a;
-            println!("{:?} {:?}", a, b);
-            return;
-        } else if (false) {
-            // handle the case where b should be done first
-        //  || (*a > 0 && *b != i32::MIN && *a > -1*(*b))
-        } else {
-            // do b-a
-            println!("block two {:?} {:?}", a, b);
-            *b = *b + *a;
-            println!("{:?} {:?}", a, b);
-            *a = *b - *a;
-            println!("{:?} {:?}", a, b);
-            *b = *a + *b;
-            println!("{:?} {:?}", a, b);
-            return;
-        }
+    // check for numbers that will cause overflows
+    if *a == i32::MIN {
+        *a = *b;
+        *b = i32::MIN;
+        return;
     }
+
+    if *b == i32::MIN {
+        return swap_integers(b, a);
+    }
+
+    // check for negative signs
+    if *a < 0 {
+        *a *= -1;
+        swap_integers(a, b);
+        *b *= -1;
+        return;
+    }
+
+    if *b < 0 {
+        *b *= -1;
+        swap_integers(a, b);
+        *a *= -1;
+        return;
+    }
+
+    // For simplicity, we'll require a > b
+    if *b > *a {
+        swap_integers(b, a);
+        return;
+    }
+
+    // otherwise, things will fit nicely into this pattern
+    *a = *a - *b;
+    *b = *b + *a;
+    *a = *b - *a;
+    return;
 }
